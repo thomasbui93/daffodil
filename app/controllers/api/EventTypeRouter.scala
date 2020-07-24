@@ -9,6 +9,10 @@ import play.api.routing.sird._
 
 class EventTypeRouter @Inject() (controller: EventTypeController) extends SimpleRouter {
   override def routes: Routes = {
-    case GET(p"/") => controller.index
+    case GET(p"/" ? q_o"p=${int(page)}"&q_o"s=${int(size)}"&q_o"q=${search}") =>
+      controller.index(search, page.getOrElse(1), size.getOrElse(10))
+    case POST(p"/") => controller.insert
+    case GET(p"/${int(id)}") => controller.getOne(id)
+    case DELETE(p"/${int(id)}") => controller.removeOne(id)
   }
 }
