@@ -27,11 +27,26 @@ class EventTypeDAO @Inject()
       .result
   }
 
+  def count(search: Option[String], page: Int = 1, size: Int = 10): Future[Int] = db.run {
+    eventTypeTable
+      .filter(_.title like s"%${search.getOrElse("")}%")
+      .length
+      .result
+  }
+
   val insertQuery = eventTypeTable returning eventTypeTable.map(_.id) into ((eventType, id) => eventType.copy(id = id))
 
   def insert(title: String): Future[EventType] = {
-    val action = insertQuery += EventType(None, title, None, None, None)
+    val now = Timestamp.valueOf(LocalDateTime.now())
+    val action = insertQuery += EventType(None, title, Some(now), Some(now), None)
     db.run(action)
+  }
+
+  def update(id: Int, eventType: EventType): Future[Int] = db.run {
+    val now = Timestamp.valueOf(LocalDateTime.now())
+    eventTypeTable.filter(_.id === id)
+      .map(s => (s.title, s.updatedAt))
+      .update((eventType.title, now))
   }
 
   def getOne(id: Int): Future[Option[EventType]] = db.run {
