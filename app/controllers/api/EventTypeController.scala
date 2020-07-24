@@ -69,9 +69,7 @@ class EventTypeController @Inject()(implicit val ec: ExecutionContext,
             Ok(Json.toJson(eventType))
           })
           .recover {
-            case e: Exception =>
-              println(e)
-              InternalServerError("You failed!")
+            case e: Exception => InternalServerError("You failed!")
           }
       }
     )
