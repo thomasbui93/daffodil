@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject._
-import play.api._
+import play.api.libs.json._
 import play.api.mvc._
 
 /**
@@ -19,6 +19,6 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
    * a path of `/`.
    */
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    Ok(Json.obj("message" -> "Welcome to Daffodil application."))
   }
 }
