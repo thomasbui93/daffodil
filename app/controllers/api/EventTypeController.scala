@@ -7,8 +7,6 @@ import services.event.EventTypeService
 import scala.concurrent.{ExecutionContext, Future}
 import models.EventType
 
-case class SearchResult[A](list: Seq[A], count: Int)
-
 class EventTypeController @Inject()(implicit val ec: ExecutionContext,
                                      val eventTypeService: EventTypeService,
                                      val cc: ControllerComponents)

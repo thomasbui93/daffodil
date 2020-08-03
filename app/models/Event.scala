@@ -1,8 +1,11 @@
 package models
 
-case class Event(id: Int,
+import java.sql.Timestamp
+
+case class Event(id: Option[Int],
                  title: String,
                  description: String,
                  eventType: EventType,
-                 createdAt: java.sql.Timestamp,
-                 deletedAt: Option[java.sql.Timestamp])
+                 createdAt: Option[Timestamp],
+                 updatedAt: Option[Timestamp],
+                 deletedAt: Option[Timestamp])

@@ -1,4 +1,4 @@
--- Users schema
+-- event_types schema
 
 -- !Ups
 

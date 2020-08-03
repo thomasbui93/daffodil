@@ -3,13 +3,13 @@ package dao.event
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import configuration.PaginationConfig
+import dao.event.tables.EventTypeTable
 import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.Inject
 import models.EventType
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.db.slick.HasDatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-import slick.sql.SqlProfile.ColumnOption.SqlType
 import play.api.Configuration
 
 class EventTypeDAO @Inject()
@@ -68,16 +68,5 @@ class EventTypeDAO @Inject()
     val now = Timestamp.valueOf(LocalDateTime.now())
     val q = for { evenType <- eventTypeTable if evenType.id === id } yield evenType.deletedAt
     q.update(Some(now))
-  }
-
-  class EventTypeTable(tag: Tag) extends Table[EventType](tag, "event_types") {
-    def id: Rep[Option[Int]] = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
-    def title: Rep[String] = column[String]("title")
-    def createdAt: Rep[Timestamp] = column[Timestamp]("createdAt", SqlType("timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"))
-    def updatedAt: Rep[Timestamp] = column[Timestamp]("updatedAt", SqlType("timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"))
-    def deletedAt: Rep[Option[Timestamp]] = column[Option[Timestamp]]("deletedAt")
-    // scalastyle:off
-    def * = (id, title, createdAt.?, updatedAt.?, deletedAt) <> ((EventType.apply _).tupled, EventType.unapply)
-    // scalastyle:on
   }
 }
