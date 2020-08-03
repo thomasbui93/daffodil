@@ -4,3 +4,7 @@ scala:
 jdk:
   - openjdk11
   - openjdk13
+
+script:
+  - sbt test
+  - sbt scalastyle

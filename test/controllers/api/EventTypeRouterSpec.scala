@@ -61,7 +61,6 @@ class EventTypeRouterSpec extends PlaySpec with GuiceOneAppPerTest {
         val json = contentAsJson(result)
         val eventType = json.as[EventType]
 
-
         eventType.id mustBe Some(1)
       }
 

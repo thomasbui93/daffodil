@@ -1,3 +1,5 @@
+import sbt.Keys.semanticdbVersion
+
 name := "daffodil"
 organization := "com.kbui"
 version := "1.0-SNAPSHOT"
@@ -12,8 +14,8 @@ libraryDependencies ++= Seq(
   guice,
   "com.typesafe.play" %% "play-slick" % "5.0.0",
   "com.typesafe.play" %% "play-slick-evolutions" % "5.0.0",
-  "com.h2database" % "h2" % versions.h2,
   // Test
+  "com.h2database" % "h2" % versions.h2,
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 )
 // Adds additional packages into Twirl
