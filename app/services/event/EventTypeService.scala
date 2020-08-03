@@ -1,14 +1,20 @@
 package services.event
 
+import configuration.PaginationConfig
 import dao.event.EventTypeDAO
 import javax.inject.Inject
 import models.EventType
+import play.api.Configuration
 import scala.concurrent.{ExecutionContext, Future}
 
-class EventTypeService @Inject()(dao: EventTypeDAO, implicit val ex: ExecutionContext){
+class EventTypeService @Inject()(dao: EventTypeDAO, config: Configuration, implicit val ex: ExecutionContext) {
+  val pagination: PaginationConfig = config.get[PaginationConfig]("daffodil.model.pagination")
+
   def create(title: String): Future[EventType] = dao.insert(title)
-  def list(search: Option[String], page: Int = 0, size: Int = 10): Future[Seq[EventType]] = dao.queries(search, page, size)
-  def count(search: Option[String], page: Int = 0, size: Int = 10): Future[Int] = dao.count(search, page, size)
+  def list(search: Option[String], page: Int = pagination.page, size: Int = pagination.size): Future[Seq[EventType]] = {
+    dao.queries(search, page, size)
+  }
+  def count(search: Option[String]): Future[Int] = dao.count(search)
   def read(id: Int): Future[Option[EventType]] = dao.getOne(id)
   def remove(id: Int, isHardRemove: Boolean): Future[Either[String, Int]] = {
     val removal = if (isHardRemove) dao.deleteOne(id) else dao.softDelete(id)

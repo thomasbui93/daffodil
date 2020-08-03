@@ -17,7 +17,7 @@ class EventTypeController @Inject()(implicit val ec: ExecutionContext,
   def index(search: Option[String], page: Int, size: Int): Action[AnyContent] = Action.async { implicit request =>
     val result = for {
       list <- eventTypeService.list(search, page, size)
-      count <- eventTypeService.count(search, page, size)
+      count <- eventTypeService.count(search)
     } yield SearchResult[EventType](list, count)
     result.map(data => Ok(Json.obj(
       "list" -> Json.toJson(data.list),
@@ -64,10 +64,7 @@ class EventTypeController @Inject()(implicit val ec: ExecutionContext,
       errors => Future.successful(BadRequest(Json.obj("message" -> JsError.toJson(errors)))),
       eventTypeJson => {
         eventTypeService.update(id, eventTypeJson)
-          .map(eventType => {
-            println(eventType)
-            Ok(Json.toJson(eventType))
-          })
+          .map(eventType => Ok(Json.toJson(eventType)))
           .recover {
             case e: Exception => InternalServerError("You failed!")
           }
