@@ -17,7 +17,7 @@ class EventTable(tag: Tag) extends Table[Event](tag, "events") {
   def updatedAt: Rep[Timestamp] = column[Timestamp]("updatedAt", SqlType("timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"))
   def deletedAt: Rep[Option[Timestamp]] = column[Option[Timestamp]]("deletedAt")
   // scalastyle:off
-  def * = (id, title, createdAt.?, updatedAt.?, deletedAt) <> ((Event.apply _).tupled, Event.unapply)
+  def * = (id, title, description, eventTypeId, createdAt.?, updatedAt.?, deletedAt) <> ((Event.apply _).tupled, Event.unapply)
   // scalastyle:on
   def eventType:ForeignKeyQuery[EventTypeTable, EventType] = {
     foreignKey("fk_event_type", eventTypeId, eventTypes)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)

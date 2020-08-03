@@ -13,8 +13,6 @@ import services.event.EventTypeService
 import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
-case class EventPayload(title: String, description: String, eventType: Int)
-
 class EventDAO @Inject()
   (protected val dbConfigProvider: DatabaseConfigProvider,
    protected val config: Configuration,
@@ -41,7 +39,7 @@ class EventDAO @Inject()
       .result
   }
 
-  def insert(payload: EventPayload, eventType: EventType): Future[Event] = {
+  def insert(payload: Event): Future[Event] = {
     val insertQuery = eventTable returning eventTable.map(_.id) into ((eventType, id) => eventType.copy(id = id))
     val now = Timestamp.valueOf(LocalDateTime.now())
     val action = insertQuery += Event(
@@ -51,7 +49,7 @@ class EventDAO @Inject()
       createdAt = Some(now),
       updatedAt = Some(now),
       deletedAt = None,
-      eventType = eventType
+      eventType = payload.eventType
     )
     db.run(action)
   }

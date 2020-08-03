@@ -4,8 +4,8 @@ import java.sql.Timestamp
 
 case class Event(id: Option[Int],
                  title: String,
-                 description: String,
-                 eventType: EventType,
+                 description: Option[String],
+                 eventType: Option[Int],
                  createdAt: Option[Timestamp],
                  updatedAt: Option[Timestamp],
                  deletedAt: Option[Timestamp])
