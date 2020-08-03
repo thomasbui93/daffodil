@@ -23,11 +23,12 @@ class EventTypeService @Inject()(dao: EventTypeDAO, config: Configuration, impli
       case _ => Right(id)
     }
   }
-
-  def update(id: Int, eventType: EventType): Future[Option[EventType]] = dao
-    .update(id, eventType)
-    .flatMap {
-      case 0 => Future.failed(new Exception(s"Failed to updated item at $id"))
-      case _ => dao.getOne(id)
-    }
+  def update(id: Int, eventType: EventType): Future[Option[EventType]] = {
+    dao
+      .update(id, eventType)
+      .flatMap {
+        case 0 => Future.failed(new Exception(s"Failed to updated item at $id"))
+        case _ => dao.getOne(id)
+      }
+  }
 }

@@ -2,11 +2,10 @@ package dao.event
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
-
 import configuration.PaginationConfig
 import dao.event.tables.EventTable
 import javax.inject.Inject
-import models.{Event, EventType}
+import models.Event
 import play.api.Configuration
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import services.event.EventTypeService
@@ -52,5 +51,45 @@ class EventDAO @Inject()
       eventType = payload.eventType
     )
     db.run(action)
+  }
+
+  def getOne(id: Int): Future[Option[Event]] = db.run {
+    eventTable
+      .filter(_.id === id)
+      .result
+      .headOption
+  }
+
+  def deleteOne(id: Int): Future[Int] = db.run {
+    eventTable
+      .filter(_.id === id)
+      .delete
+  }
+
+  def softDelete(id: Int): Future[Int] = db.run {
+    val now = Timestamp.valueOf(LocalDateTime.now())
+    val q = for { evenType <- eventTable if evenType.id === id } yield evenType.deletedAt
+    q.update(Some(now))
+  }
+
+  def update(id: Int, event: Event): Future[Int] = {
+    val populatedEventFuture = getOne(id)
+    populatedEventFuture.flatMap {
+      case Some(populatedEvent) => db.run {
+        val now = Timestamp.valueOf(LocalDateTime.now())
+        val description = event.description match {
+          case Some(value) => Some(value)
+          case None => populatedEvent.description
+        }
+        val title = event.title match {
+          case Some(value) => Some(value)
+          case None => populatedEvent.title
+        }
+        eventTable.filter(_.id === event.id)
+          .map(s => (s.title, s.description, s.updatedAt))
+          .update((title, description, now))
+      }
+      case None => Future.failed(new Exception("Update is failed"))
+    }
   }
 }

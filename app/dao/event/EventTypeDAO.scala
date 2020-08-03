@@ -36,9 +36,8 @@ class EventTypeDAO @Inject()
       .result
   }
 
-  val insertQuery = eventTypeTable returning eventTypeTable.map(_.id) into ((eventType, id) => eventType.copy(id = id))
-
   def insert(title: String): Future[EventType] = {
+    val insertQuery = eventTypeTable returning eventTypeTable.map(_.id) into ((eventType, id) => eventType.copy(id = id))
     val now = Timestamp.valueOf(LocalDateTime.now())
     val action = insertQuery += EventType(None, title, Some(now), Some(now), None)
     db.run(action)

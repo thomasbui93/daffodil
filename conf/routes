@@ -11,3 +11,4 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 # Api router
 ->      /api/event-types                 controllers.api.EventTypeRouter
+# ->      /api/events                      controllers.api.EventRouter

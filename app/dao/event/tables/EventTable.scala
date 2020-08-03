@@ -10,7 +10,7 @@ class EventTable(tag: Tag) extends Table[Event](tag, "events") {
   val eventTypes = TableQuery[EventTypeTable]
 
   def id: Rep[Option[Int]] = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
-  def title: Rep[String] = column[String]("title")
+  def title: Rep[Option[String]] = column[Option[String]]("title")
   def description: Rep[Option[String]] = column[Option[String]]("description")
   def eventTypeId: Rep[Option[Int]] = column[Option[Int]]("eventTypeId")
   def createdAt: Rep[Timestamp] = column[Timestamp]("createdAt", SqlType("timestamp not null default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"))
