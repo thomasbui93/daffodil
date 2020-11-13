@@ -30,6 +30,4 @@ object DaffodilRoutes {
         } yield resp
     }
   }
-
-  def eventLogRoutes(repo: EventLogRepo): HttpRoutes[IO] = EventLogRoutes.routes(repo)
 }
