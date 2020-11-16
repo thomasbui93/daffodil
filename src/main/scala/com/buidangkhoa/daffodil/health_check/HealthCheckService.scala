@@ -4,9 +4,15 @@ import cats.effect._
 import doobie.util.transactor.Transactor
 
 object HealthCheckService {
-  def healthCheck(transactor: Transactor[IO]): IO[HealthCheckResult] = {
+  def healthCheck(transactor: Transactor[IO]): IO[HeathCheckResponse] = {
     for {
       mySQL <- MySQLHealthCheck.check(transactor)
-    } yield mySQL
+      details = List(mySQL)
+      summary = summarize(details)
+    } yield HeathCheckResponse(summary, details)
+  }
+
+  def summarize(components: Seq[HealthCheckResult]): Boolean = {
+    components.forall(component => component.status)
   }
 }
