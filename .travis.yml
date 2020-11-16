@@ -6,6 +6,7 @@ jdk:
   - openjdk13
 
 script:
+  - cp src/main/resources/application-example.conf src/main/resources/application.conf
   - sbt test
   - sbt scalastyle
 
