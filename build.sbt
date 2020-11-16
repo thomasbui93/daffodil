@@ -6,6 +6,7 @@ val CirceConfigVersion = "0.7.0"
 val DoobieVersion = "0.8.8"
 val MySQLDriverVersion = "5.1.18"
 val ScalaLogVersion = "3.9.2"
+val FlywayVersion = "5.2.4"
 
 lazy val root = (project in file("."))
   .settings(
@@ -26,6 +27,7 @@ lazy val root = (project in file("."))
       "org.tpolecat"          %% "doobie-specs2"        % DoobieVersion,
       "com.typesafe.scala-logging" %% "scala-logging"   % ScalaLogVersion,
       "org.specs2"            %% "specs2-core"          % Specs2Version % "test",
+      "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
       "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
       "mysql"                 % "mysql-connector-java"  % MySQLDriverVersion,
     ),

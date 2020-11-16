@@ -24,11 +24,12 @@ object DaffodilServer {
     } yield RootConfig(tx, config)
   }
   private def run(rootConfig: RootConfig)(implicit timer: Timer[IO], cx: ContextShift[IO]): IO[ExitCode] = {
-    val httpApp = DaffodilRoutes.healthCheckRoutes(
-      new HealthCheckServiceImpl(rootConfig.transactor)
-    ).orNotFound
-    val finalHttpApp = Logger.httpApp(logHeaders = true, logBody = true)(httpApp)
     for {
+      _ <- DatabaseTransactor.initialize(rootConfig.transactor)
+      httpApp = DaffodilRoutes.healthCheckRoutes(
+        new HealthCheckServiceImpl(rootConfig.transactor)
+      ).orNotFound
+      finalHttpApp = Logger.httpApp(logHeaders = true, logBody = true)(httpApp)
       exitCode <- BlazeServerBuilder[IO](global)
         .bindHttp(rootConfig.config.serverConfig.port, rootConfig.config.serverConfig.host)
         .withHttpApp(finalHttpApp)
