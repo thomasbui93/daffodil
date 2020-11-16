@@ -27,7 +27,7 @@ lazy val root = (project in file("."))
       "com.typesafe.scala-logging" %% "scala-logging"   % ScalaLogVersion,
       "org.specs2"            %% "specs2-core"          % Specs2Version % "test",
       "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
-      "mysql"                 % "mysql-connector-java"  % "5.1.18",
+      "mysql"                 % "mysql-connector-java"  % MySQLDriverVersion,
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
