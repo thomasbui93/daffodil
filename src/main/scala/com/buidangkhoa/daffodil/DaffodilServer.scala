@@ -23,8 +23,8 @@ object DaffodilServer {
   }
   private def run(rootConfig: RootConfig)(implicit timer: Timer[IO], cx: ContextShift[IO]): IO[ExitCode] = {
     val helloWorldAlg = HelloWorld.impl[IO]
-    val httpApp = DaffodilRoutes.helloWorldRoutes[IO](helloWorldAlg).orNotFound
-    val finalHttpApp = Logger.httpApp(true, true)(httpApp)
+    val httpApp = DaffodilRoutes.healthCheckRoutes(rootConfig.transactor).orNotFound
+    val finalHttpApp = Logger.httpApp(logHeaders = true, logBody = true)(httpApp)
     for {
       exitCode <- BlazeServerBuilder[IO](global)
         .bindHttp(rootConfig.config.serverConfig.port, rootConfig.config.serverConfig.host)
@@ -34,6 +34,5 @@ object DaffodilServer {
         .lastOrError
     } yield exitCode
   }
-
   case class RootConfig(transactor: HikariTransactor[IO], config: AppConfig)
 }

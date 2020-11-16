@@ -1,19 +1,21 @@
 package com.buidangkhoa.daffodil
 
-import cats.effect.{IO, Sync}
-import cats.implicits._
+import cats.effect.IO
+import doobie.util.transactor.Transactor
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
+import health_check.HealthCheckService
 
 object DaffodilRoutes {
-  def helloWorldRoutes[F[_]: Sync](H: HelloWorld[F]): HttpRoutes[F] = {
-    val dsl = new Http4sDsl[F]{}
+  def healthCheckRoutes(transactor: Transactor[IO]): HttpRoutes[IO] = {
+    val dsl = new Http4sDsl[IO] {}
     import dsl._
-    HttpRoutes.of[F] {
-      case GET -> Root / "hello" / name =>
+
+    HttpRoutes.of[IO] {
+      case GET -> Root / "z" / "ping" =>
         for {
-          greeting <- H.hello(HelloWorld.Name(name))
-          resp <- Ok(greeting)
+          healthCheck <- HealthCheckService.healthCheck(transactor)
+          resp <- Ok(healthCheck)
         } yield resp
     }
   }
