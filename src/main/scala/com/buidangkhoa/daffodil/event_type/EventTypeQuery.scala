@@ -12,10 +12,24 @@ object EventTypeQuery {
       .transact(tx)
   }
 
+  def findByTitle(title: String, tx: Transactor[IO]): IO[Int] = {
+    sql"""SELECT COUNT(*) FROM event_types WHERE title = $title"""
+      .query[Int]
+      .unique
+      .transact(tx)
+  }
+
   def queryOne(id: Int, tx: Transactor[IO]): IO[Option[EventType]] = {
     sql"""SELECT id, title, createdAt, updatedAt FROM event_types WHERE id = $id"""
       .query[EventType]
       .option
+      .transact(tx)
+  }
+
+  def queryOneAfterCreate(id: Int, tx: Transactor[IO]): IO[EventType] = {
+    sql"""SELECT id, title, createdAt, updatedAt FROM event_types WHERE id = $id"""
+      .query[EventType]
+      .unique
       .transact(tx)
   }
 
@@ -30,6 +44,20 @@ object EventTypeQuery {
     sql"""SELECT COUNT(*) FROM event_types"""
       .query[Int]
       .unique
+      .transact(tx)
+  }
+
+  def remove(id: Int, tx: Transactor[IO]): IO[Int] = {
+    sql"""DELETE FROM event_types WHERE id = $id"""
+      .update
+      .run
+      .transact(tx)
+  }
+
+  def update(id: Int, title: String, tx: Transactor[IO]): IO[Int] = {
+    sql"""UPDATE event_types SET title = $title WHERE id = $id"""
+      .update
+      .run
       .transact(tx)
   }
 }
