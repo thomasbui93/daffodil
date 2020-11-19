@@ -3,8 +3,9 @@ package com.buidangkhoa.daffodil.event_type
 import doobie.util.transactor.Transactor
 import cats.effect.IO
 import doobie.implicits._
+import com.typesafe.scalalogging.LazyLogging
 
-object EventTypeQuery {
+object EventTypeQuery extends LazyLogging {
   def insert(title: String, tx: Transactor[IO]): IO[Int] = {
     sql"""INSERT INTO event_types (title) VALUES ($title)"""
       .update
@@ -26,7 +27,7 @@ object EventTypeQuery {
       .transact(tx)
   }
 
-  def queryOneAfterCreate(id: Int, tx: Transactor[IO]): IO[EventType] = {
+  def queryOneAfterUpdate(id: Int, tx: Transactor[IO]): IO[EventType] = {
     sql"""SELECT id, title, createdAt, updatedAt FROM event_types WHERE id = $id"""
       .query[EventType]
       .unique

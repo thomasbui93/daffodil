@@ -2,59 +2,71 @@ package com.buidangkhoa.daffodil.event_type
 
 import doobie.util.transactor.Transactor
 import cats.effect.IO
-import com.buidangkhoa.daffodil.event_type.exceptions.{EventTypeCreationFailedException, EventTypeNotFoundException, EventTypeUpdateException}
+import com.buidangkhoa.daffodil.event_type.exceptions.{
+  EventTypeNotFoundException,
+  InvalidEventTypeTitleException
+}
 
 class EventTypeServiceImpl(tx: Transactor[IO]) extends EventTypeService[IO] {
-  def isTitleExisted(title: String): IO[Boolean] = {
+  def checkEmptyTitle(title: String): IO[Unit] = {
+    if (title.length == 0) {
+      IO.raiseError(InvalidEventTypeTitleException("Event type's title can not be empty."))
+    } else {
+      IO(())
+    }
+  }
+  def checkTitleExisted(title: String): IO[Unit] = {
     EventTypeQuery
       .findByTitle(title, tx)
-      .map(result => result >= 1)
+      .flatMap(result => {
+        if (result >= 1) {
+          IO.raiseError(InvalidEventTypeTitleException("Event type's title already existed."))
+        } else {
+          IO(())
+        }
+      })
   }
-  override def create(title: String): IO[Either[EventTypeCreationFailedException, EventType]] = {
-    isTitleExisted(title).flatMap(isValid => {
-      if (isValid) {
-        IO(Left(EventTypeCreationFailedException("Event type's title is duplicated.")))
-      } else {
-        val evt = for {
-          id <- EventTypeQuery.insert(title, tx)
-          evt <- EventTypeQuery.queryOneAfterCreate(id, tx)
-        } yield evt
-        evt.map(eventType => Right(eventType))
-      }
-    })
+  def validateTitle(title: String): IO[Unit] = {
+    for {
+      _ <- checkEmptyTitle(title)
+      _ <- checkTitleExisted(title)
+    } yield IO(())
   }
-
-  override def get(id: Int): IO[Either[EventTypeNotFoundException, EventType]] = {
+  override def create(title: String): IO[EventType] = {
+    for {
+      _ <- validateTitle(title)
+      id <- EventTypeQuery.insert(title, tx)
+      evt <- EventTypeQuery.queryOneAfterUpdate(id, tx)
+    } yield evt
+  }
+  override def get(id: Int): IO[EventType] = {
     EventTypeQuery.queryOne(id, tx)
-      .map {
-        case Some(eventType) => Right(eventType)
-        case None => Left(EventTypeNotFoundException(s"""Event type not found with ${id}"""))
+      .flatMap {
+        case Some(eventType) => IO(eventType)
+        case None => IO.raiseError(EventTypeNotFoundException(s"""Event type not found with id ${id}"""))
       }
   }
-
   override def list(): IO[Seq[EventType]] = EventTypeQuery.query(tx)
-
   override def count(): IO[Int] = EventTypeQuery.count(tx)
-
-  override def remove(id: Int): IO[Boolean] = {
+  override def remove(id: Int): IO[Unit] = {
     EventTypeQuery.remove(id, tx)
-      .map(affectedRows => affectedRows >= 1)
-  }
-
-  override def update(id: Int, title: String): IO[Either[EventTypeUpdateException, EventType]] = {
-    isTitleExisted(title).flatMap(isValid => {
-      if (isValid) {
-        IO(Left(EventTypeUpdateException("Event type's title is duplicated.")))
-      } else {
-        EventTypeQuery.update(id, title, tx)
-          .flatMap(rows => {
-            if (rows >= 1) {
-              EventTypeQuery.queryOneAfterCreate(id, tx).map(ev => Right(ev))
-            } else {
-              IO(Left(EventTypeUpdateException(s"""Event type not found with ${id}""")))
-            }
-          })
+      .flatMap { rows =>
+        if (rows == 0) {
+          IO.raiseError(EventTypeNotFoundException(s"""Event type not found with id ${id}"""))
+        } else {
+          IO(())
+        }
       }
-    })
+  }
+  override def update(id: Int, title: String): IO[EventType] = {
+    for {
+      _ <- validateTitle(title)
+      rows <- EventTypeQuery.update(id, title, tx)
+      evt <- if (rows >= 1) {
+        EventTypeQuery.queryOneAfterUpdate(id, tx)
+      } else {
+        IO.raiseError(EventTypeNotFoundException(s"""Event type not found with id ${id}"""))
+      }
+    } yield evt
   }
 }
