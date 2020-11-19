@@ -2,10 +2,7 @@ package com.buidangkhoa.daffodil.event_type
 
 import doobie.util.transactor.Transactor
 import cats.effect.IO
-import com.buidangkhoa.daffodil.event_type.exceptions.{
-  EventTypeNotFoundException,
-  InvalidEventTypeTitleException
-}
+import com.buidangkhoa.daffodil.event_type.exceptions.{EventTypeNotFoundException, InvalidEventTypeTitleException}
 
 class EventTypeServiceImpl(tx: Transactor[IO]) extends EventTypeService[IO] {
   def checkEmptyTitle(title: String): IO[Unit] = {
@@ -35,8 +32,7 @@ class EventTypeServiceImpl(tx: Transactor[IO]) extends EventTypeService[IO] {
   override def create(title: String): IO[EventType] = {
     for {
       _ <- validateTitle(title)
-      id <- EventTypeQuery.insert(title, tx)
-      evt <- EventTypeQuery.queryOneAfterUpdate(id, tx)
+      evt <- EventTypeQuery.insert(title, tx)
     } yield evt
   }
   override def get(id: Int): IO[EventType] = {

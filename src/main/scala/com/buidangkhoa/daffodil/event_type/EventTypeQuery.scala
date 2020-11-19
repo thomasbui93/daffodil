@@ -6,11 +6,16 @@ import doobie.implicits._
 import com.typesafe.scalalogging.LazyLogging
 
 object EventTypeQuery extends LazyLogging {
-  def insert(title: String, tx: Transactor[IO]): IO[Int] = {
-    sql"""INSERT INTO event_types (title) VALUES ($title)"""
-      .update
-      .run
-      .transact(tx)
+  def insert(title: String, tx: Transactor[IO]): IO[EventType] = {
+    val evt = for {
+      id <- sql"""INSERT INTO event_types (title) VALUES ($title)"""
+        .update
+        .withUniqueGeneratedKeys[Int]("id")
+      evt <- sql"""SELECT id, title, createdAt, updatedAt FROM event_types WHERE id = $id"""
+        .query[EventType]
+        .unique
+    } yield evt
+    evt.transact(tx)
   }
 
   def findByTitle(title: String, tx: Transactor[IO]): IO[Int] = {
