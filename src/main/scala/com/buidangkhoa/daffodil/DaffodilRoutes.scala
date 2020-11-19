@@ -3,12 +3,13 @@ package com.buidangkhoa.daffodil
 import cats.effect.{IO, Sync}
 import com.buidangkhoa.daffodil.common.ErrorHttpResponse
 import com.buidangkhoa.daffodil.event_type.exceptions.{EventTypeNotFoundException, InvalidEventTypeTitleException}
+import com.buidangkhoa.daffodil.event_type.http.{EventTypeListResponse, EventTypeRequest}
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.{HttpRoutes, Status}
 import org.http4s.dsl.Http4sDsl
 import health_check.HealthCheckService
 import org.http4s.circe._
-import event_type.{EventTypeListResponse, EventTypeRequest, EventTypeService}
+import event_type.EventTypeService
 
 object DaffodilRoutes extends LazyLogging {
   def healthCheckRoutes(healthCheckService: HealthCheckService[IO]): HttpRoutes[IO] = {

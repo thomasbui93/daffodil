@@ -1,11 +1,11 @@
-package com.buidangkhoa.daffodil.event_type
+package com.buidangkhoa.daffodil.event_type.http
 
 import cats.Applicative
 import cats.effect.Sync
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import org.http4s.{EntityDecoder, EntityEncoder}
+import io.circe.{Decoder, Encoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.{EntityDecoder, EntityEncoder}
 
 case class EventTypeRequest(title: String)
 

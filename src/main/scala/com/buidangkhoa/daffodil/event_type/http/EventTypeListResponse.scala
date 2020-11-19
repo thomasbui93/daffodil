@@ -1,6 +1,7 @@
-package com.buidangkhoa.daffodil.event_type
+package com.buidangkhoa.daffodil.event_type.http
 
 import cats.Applicative
+import com.buidangkhoa.daffodil.event_type.EventType
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.EntityEncoder
