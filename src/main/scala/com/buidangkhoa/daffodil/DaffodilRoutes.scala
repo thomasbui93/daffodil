@@ -1,15 +1,16 @@
 package com.buidangkhoa.daffodil
 
 import cats.effect.{IO, Sync}
-import com.buidangkhoa.daffodil.common.ErrorHttpResponse
+import com.buidangkhoa.daffodil.common.exceptions.InvalidQueryParamException
 import com.buidangkhoa.daffodil.event_type.exceptions.{EventTypeNotFoundException, InvalidEventTypeTitleException}
 import com.buidangkhoa.daffodil.event_type.http.{EventTypeListResponse, EventTypeRequest}
 import com.typesafe.scalalogging.LazyLogging
-import org.http4s.{HttpRoutes, Status}
+import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import health_check.HealthCheckService
 import org.http4s.circe._
 import event_type.EventTypeService
+import common.{ErrorHttpResponse, HttpConfiguration, PageQueryParamMatcher, SizeQueryParamMatcher}
 
 object DaffodilRoutes extends LazyLogging {
   def healthCheckRoutes(healthCheckService: HealthCheckService[IO]): HttpRoutes[IO] = {
@@ -35,12 +36,19 @@ object DaffodilRoutes extends LazyLogging {
     } yield resp
 
     HttpRoutes.of[IO] {
-      case GET -> Root / "api" / "event-types" =>
-        for {
-          eventTypeList <- service.list()
+      case GET -> Root / "api" / "event-types" :? PageQueryParamMatcher(page) +& SizeQueryParamMatcher(size) =>
+        val resp = for {
+          eventTypeList <- service.list(
+            page.getOrElse(HttpConfiguration.paginationPage),
+            size.getOrElse(HttpConfiguration.paginationSize)
+          )
           count <- service.count()
           resp <- Ok(EventTypeListResponse(eventTypeList, count))
         } yield resp
+        resp.handleErrorWith({
+          case InvalidQueryParamException(ex) => BadRequest(ErrorHttpResponse(error = true, ex))
+          case ex @ _ => errorResp(ex)
+        })
       case req @ POST -> Root / "api" / "event-types" =>
         val eventTypeOption = for {
           eventTypeReq <- req.decodeJson[EventTypeRequest]

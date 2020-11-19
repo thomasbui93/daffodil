@@ -4,6 +4,7 @@ import doobie.util.transactor.Transactor
 import cats.effect.IO
 import doobie.implicits._
 import com.typesafe.scalalogging.LazyLogging
+import doobie.util.log.LogHandler
 
 object EventTypeQuery extends LazyLogging {
   def insert(title: String, tx: Transactor[IO]): IO[EventType] = {
@@ -39,9 +40,9 @@ object EventTypeQuery extends LazyLogging {
       .transact(tx)
   }
 
-  def query(tx: Transactor[IO]): IO[Seq[EventType]] = {
-    sql"""SELECT id, title, createdAt, updatedAt FROM event_types"""
-      .query[EventType]
+  def query(limit: Int, offset: Int, tx: Transactor[IO]): IO[Seq[EventType]] = {
+    sql"""SELECT id, title, createdAt, updatedAt FROM event_types LIMIT $limit OFFSET $offset"""
+      .queryWithLogHandler[EventType](LogHandler.jdkLogHandler)
       .to[List]
       .transact(tx)
   }

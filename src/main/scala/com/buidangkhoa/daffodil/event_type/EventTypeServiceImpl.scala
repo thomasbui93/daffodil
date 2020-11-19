@@ -2,6 +2,8 @@ package com.buidangkhoa.daffodil.event_type
 
 import doobie.util.transactor.Transactor
 import cats.effect.IO
+import com.buidangkhoa.daffodil.common.HttpConfiguration
+import com.buidangkhoa.daffodil.common.exceptions.InvalidQueryParamException
 import com.buidangkhoa.daffodil.event_type.exceptions.{EventTypeNotFoundException, InvalidEventTypeTitleException}
 
 class EventTypeServiceImpl(tx: Transactor[IO]) extends EventTypeService[IO] {
@@ -42,7 +44,14 @@ class EventTypeServiceImpl(tx: Transactor[IO]) extends EventTypeService[IO] {
         case None => IO.raiseError(EventTypeNotFoundException(s"""Event type not found with id ${id}"""))
       }
   }
-  override def list(): IO[Seq[EventType]] = EventTypeQuery.query(tx)
+  override def list(page: Int = HttpConfiguration.paginationPage,
+                    size: Int = HttpConfiguration.paginationSize): IO[Seq[EventType]] = {
+    if ( page < 1) {
+      IO.raiseError(InvalidQueryParamException("Page param has to be more than 0."))
+    } else {
+      EventTypeQuery.query(size, size * (page - 1), tx)
+    }
+  }
   override def count(): IO[Int] = EventTypeQuery.count(tx)
   override def remove(id: Int): IO[Unit] = {
     EventTypeQuery.remove(id, tx)
